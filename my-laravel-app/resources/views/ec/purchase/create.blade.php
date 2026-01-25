@@ -3,6 +3,8 @@
 @section('title', '商品購入')
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <div class="products-container">
   <div class="page_head">
     <h1 class="page_title">商品購入</h1>
@@ -19,56 +21,58 @@
     </div>
   @endif
 
-  <div class="table-wrap" style="padding:16px;">
-    <table class="products-table">
-      <tbody>
-        <tr>
-          <th style="width:160px;">商品名</th>
-          <td>{{ $product->name }}</td>
-        </tr>
-        <tr>
-          <th>金額</th>
-          <td>¥{{ number_format($product->price) }}</td>
-        </tr>
-        <tr>
-          <th>在庫</th>
-          <td>{{ $product->stock }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <form method="POST" action="{{ route('ec.purchase.store', $product) }}" class="product-form">
+  <form method="POST" action="{{ route('ec.purchase.store', $product) }}">
     @csrf
 
-    <div class="form-row">
-      <label>購入個数</label>
-      <input
-        type="number"
-        name="quantity"
-        value="{{ old('quantity', 1) }}"
-        min="1"
-        max="{{ $product->stock }}"
-        {{ $product->stock <= 0 ? 'disabled' : '' }}
-      >
-      @if($product->stock <= 0)
-        <div style="margin-top:6px;color:#c00;">在庫切れのため購入できません</div>
-      @endif
+    <div class="table-wrap" style="padding:16px;">
+      <table class="products-table">
+        <tbody>
+          <tr>
+            <th style="width:160px;">商品名</th>
+            <td>{{ $product->name }}</td>
+          </tr>
+          <tr>
+            <th>価格</th>
+            <td>¥{{ number_format($product->price) }}</td>
+          </tr>
+          <tr>
+            <th>在庫</th>
+            <td>{{ $product->stock }}</td>
+          </tr>
+          <tr>
+            <th>購入個数</th>
+            <td>
+              <input
+                type="number"
+                name="quantity"
+                value="{{ old('quantity', 1) }}"
+                min="1"
+                max="{{ $product->stock }}"
+                class="qty-input"
+                {{ $product->stock <= 0 ? 'disabled' : '' }}
+              >
+              @error('quantity')
+                <div class="error-text">{{ $message }}</div>
+              @enderror
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-        <div class="form-row" style="margin-top:16px;">
-      <button
-        type="submit"
-        class="btn-cart"
-        {{ $product->stock <= 0 ? 'disabled' : '' }}
-      >
-        購入する
-      </button>
-      <a href="{{ route('ec.products.show', $product) }}" class="btn-back">
-       戻る
-      </a>
+    <div class="product-actions">
+      @if($product->stock > 0)
+        <button type="submit" class="btn-cart">購入確定</button>
+      @else
+        <button type="button" class="btn-cart" disabled>在庫切れ</button>
+      @endif
+
+      <a href="{{ route('ec.products.show', $product) }}" class="btn-back">戻る</a>
     </div>
-</form>
+  </form>
+</div>
+@endsection
+
 
 
     

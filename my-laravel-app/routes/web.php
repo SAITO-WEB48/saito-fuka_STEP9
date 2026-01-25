@@ -52,7 +52,7 @@ Route::middleware('auth')->group(function () {
     //ECマイページ
     Route::middleware('auth')
         ->get('/ec/mypage', [\App\Http\Controllers\Ec\MypageController::class, 'index'])
-        ->name('ec.mypage.index');
+        ->name('ec.mypage');
 
     // 商品一覧
     Route::get('/ec/products', [ProductController::class, 'index'])

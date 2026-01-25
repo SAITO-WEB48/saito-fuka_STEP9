@@ -19,43 +19,42 @@ class PurchaseController extends Controller
 
     // 購入処理（POST）
     public function store(Request $request, Product $product)
-    {
-        // 在庫0は購入不可（画面から無理やりPOSTされても防ぐ）
-        if ($product->stock <= 0) {
-            return back()->withErrors(['quantity' => '在庫切れのため購入できません'])->withInput();
-        }
+{
+    $validated = $request->validate([
+        'quantity' => ['required', 'integer', 'min:1'],
+    ]);
 
-        // 購入個数：1以上 & 在庫以下
-        $validated = $request->validate([
-            'quantity' => ['required', 'integer', 'min:1', 'max:' . $product->stock],
-        ]);
+    $qty = (int) $validated['quantity'];
 
-        try {
-            DB::transaction(function () use ($product, $validated) {
-                // 在庫の取り合い対策（同時購入でも安全に）
-                $fresh = Product::lockForUpdate()->find($product->id);
+    try {
+        DB::transaction(function () use ($product, $qty) {
 
-                if ($fresh->stock < $validated['quantity']) {
-                    throw new \RuntimeException('在庫が不足しています');
-                }
-                
-                //在庫減らす
-                $fresh->stock -= $validated['quantity'];
-                $fresh->save();
+            $fresh = Product::whereKey($product->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-                //ordersに購入履歴を保存
-                Order::create([
-                    'user_id' => Auth::id(),
-                    'product_id' => $fresh->id,
-                    'quantity' => $validated['quantity'],
-                ]);
-            });
-        } catch (\Throwable $e) {
-            return back()->withErrors(['quantity' => $e->getMessage()])->withInput();
-        }
+            if ($fresh->stock <= 0) {
+                throw new \RuntimeException('在庫切れのため購入できません');
+            }
 
-        return redirect()
-            ->route('ec.products.show', $product)
-            ->with('success', '購入しました');
+            if ($fresh->stock < $qty) {
+                throw new \RuntimeException('在庫が不足しています');
+            }
+
+            $fresh->decrement('stock', $qty);
+
+            Order::create([
+                'user_id' => Auth::id(),
+                'product_id' => $fresh->id,
+                'quantity' => $qty,
+            ]);
+        });
+    } catch (\Throwable $e) {
+        return back()->withErrors(['quantity' => $e->getMessage()])->withInput();
     }
+
+    return redirect()
+        ->route('ec.mypage') 
+        ->with('success', '購入しました');
+}
 }

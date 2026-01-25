@@ -1,3 +1,8 @@
+@if(auth()->check())
+  <p style="color:red;">ログインID: {{ auth()->id() }}</p>
+@endif
+
+
 @extends('layouts.app')
 
 @section('title', 'マイページ')
