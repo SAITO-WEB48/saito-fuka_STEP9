@@ -14,47 +14,57 @@ class PurchaseController extends Controller
     // 購入画面表示
     public function create(Product $product)
     {
+        //  自分の商品は購入画面に入れない
+        if ($product->user_id === Auth::id()) {
+            abort(403, '自分の商品は購入できません');
+        }
+
         return view('ec.purchase.create', compact('product'));
     }
 
     // 購入処理（POST）
     public function store(Request $request, Product $product)
-{
-    $validated = $request->validate([
-        'quantity' => ['required', 'integer', 'min:1'],
-    ]);
+    {
+        //  自分の商品は購入処理できない
+        if ($product->user_id === Auth::id()) {
+            abort(403, '自分の商品は購入できません');
+        }
 
-    $qty = (int) $validated['quantity'];
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
 
-    try {
-        DB::transaction(function () use ($product, $qty) {
+        $qty = (int) $validated['quantity'];
 
-            $fresh = Product::whereKey($product->id)
-                ->lockForUpdate()
-                ->firstOrFail();
+        try {
+            DB::transaction(function () use ($product, $qty) {
 
-            if ($fresh->stock <= 0) {
-                throw new \RuntimeException('在庫切れのため購入できません');
-            }
+                $fresh = Product::whereKey($product->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            if ($fresh->stock < $qty) {
-                throw new \RuntimeException('在庫が不足しています');
-            }
+                if ($fresh->stock <= 0) {
+                    throw new \RuntimeException('在庫切れのため購入できません');
+                }
 
-            $fresh->decrement('stock', $qty);
+                if ($fresh->stock < $qty) {
+                    throw new \RuntimeException('在庫が不足しています');
+                }
 
-            Order::create([
-                'user_id' => Auth::id(),
-                'product_id' => $fresh->id,
-                'quantity' => $qty,
-            ]);
-        });
-    } catch (\Throwable $e) {
-        return back()->withErrors(['quantity' => $e->getMessage()])->withInput();
+                $fresh->decrement('stock', $qty);
+
+                Order::create([
+                    'user_id' => Auth::id(),
+                    'product_id' => $fresh->id,
+                    'quantity' => $qty,
+                ]);
+            });
+        } catch (\Throwable $e) {
+            return back()->withErrors(['quantity' => $e->getMessage()])->withInput();
+        }
+
+        return redirect()
+            ->route('ec.mypage')
+            ->with('success', '購入しました');
     }
-
-    return redirect()
-        ->route('ec.mypage') 
-        ->with('success', '購入しました');
-}
 }

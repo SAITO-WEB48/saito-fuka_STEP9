@@ -12,7 +12,8 @@
   </div>
 
   @php
-    $isFavorited = $product->isFavoritedBy(auth()->user());
+    $isOwner = auth()->check() && auth()->id() === $product->user_id;
+    $isFavorited = auth()->check() ? $product->isFavoritedBy(auth()->user()) : false;
   @endphp
 
   <div class="table-wrap" style="padding:16px;">
@@ -41,22 +42,27 @@
                 <div class="product-img placeholder"></div>
               @endif
 
-              <button
-                id="favorite-btn"
-                data-product-id="{{ $product->id }}"
-                data-favorited="{{ $isFavorited ? '1' : '0' }}"
-                class="favorite-btn"
-                aria-label="お気に入り"
-                type="button"
-              >
-                <span id="favorite-heart" style="color: {{ $isFavorited ? 'red' : '#999' }};">
-                  ♥
-                </span>
-              </button>
+              {{-- 他人の商品だけお気に入り表示 --}}
+              @if(!$isOwner)
+                <button
+                  id="favorite-btn"
+                  data-product-id="{{ $product->id }}"
+                  data-favorited="{{ $isFavorited ? '1' : '0' }}"
+                  class="favorite-btn"
+                  aria-label="お気に入り"
+                  type="button"
+                >
+                  <span id="favorite-heart" style="color: {{ $isFavorited ? 'red' : '#999' }};">
+                    ♥
+                  </span>
+                </button>
+              @endif
             </div>
           </td>
         </tr>
 
+        {{-- 他人の商品だけ購入個数を表示 --}}
+        @if(!$isOwner)
         <tr>
           <th>購入個数</th>
           <td>
@@ -79,6 +85,7 @@
             </form>
           </td>
         </tr>
+        @endif
 
         <tr>
           <th>料金</th>
@@ -93,18 +100,9 @@
   </div>
 
   <div class="product-actions">
-    @if($product->stock > 0)
-      <a href="{{ route('ec.purchase.create', $product) }}" class="btn-cart">
-        カートに追加する
-      </a>
-    @else
-      <button class="btn-cart" disabled>在庫切れ</button>
-    @endif
 
-    <a href="{{ url()->previous() }}" class="btn-back">戻る</a>
-
-    {{-- 編集・削除（出品者のみ） --}}
-    @if(Auth::check() && Auth::id() === $product->user_id)
+    {{-- 自分の商品：編集・削除だけ --}}
+    @if($isOwner)
       <a href="{{ route('ec.products.edit', $product) }}" class="btn-back">編集</a>
 
       <form method="POST"
@@ -115,7 +113,19 @@
         @method('DELETE')
         <button type="submit" class="btn-danger">削除</button>
       </form>
+
+    {{-- 他人の商品：購入ボタン --}}
+    @else
+      @if($product->stock > 0)
+        <a href="{{ route('ec.purchase.create', $product) }}" class="btn-cart">
+          カートに追加する
+        </a>
+      @else
+        <button class="btn-cart" disabled>在庫切れ</button>
+      @endif
     @endif
+
+    <a href="{{ url()->previous() }}" class="btn-back">戻る</a>
   </div>
 </div>
 

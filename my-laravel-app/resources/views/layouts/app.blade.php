@@ -12,7 +12,7 @@
 <header class="layout_header">
   <nav class="layout_header__nav">
     <a class="layout_header__link" href="{{ route('ec.products.index') }}">Home</a>
-    <a class="layout_header__link" href="{{ route('ec.mypage.index') }}">マイページ</a>
+    <a class="layout_header__link" href="{{ route('ec.mypage') }}">マイページ</a>
     <a class="layout_header__link" href="{{ route('ec.contact.create') }}">お問い合わせ</a>
 
     <div class="layout_header__auth">

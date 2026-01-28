@@ -72,7 +72,7 @@
   {{-- 下部：購入した商品 --}}
   <section class="mypage-card">
     <div class="mypage-card__head">
-      <h2 class="mypage-subtitle">＜購入した商品＞</h2>
+      <h2 class="mypage-subtitle">＜購入履歴＞</h2>
     </div>
 
     @if ($orders->isEmpty())
