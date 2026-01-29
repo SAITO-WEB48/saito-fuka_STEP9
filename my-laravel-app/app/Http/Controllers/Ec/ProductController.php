@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 
 class ProductController extends Controller
 {
@@ -52,16 +54,15 @@ public function index(Request $request)
     }
 
     // 商品保存  (登録store)
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $validated = $request->validate([
-            'name'        => ['required', 'max:255'],
-            'description' => ['nullable', 'max:1000'],
-            'price'       => ['required', 'integer', 'min:0'],
-            'stock'       => ['required', 'integer', 'min:0'],
-        ]);
+        $validated = $request->validated();
 
         $validated['user_id'] = Auth::id();
+
+        if ($request->hasFile('image')) {
+        $validated['image'] = $request->file('image')->store('products', 'public');
+    }
 
         Product::create($validated);
 
@@ -123,9 +124,9 @@ public function edit(\App\Models\Product $product)
 }
 
 //更新(update)
-public function update(\Illuminate\Http\Request $request, \App\Models\Product $product)
+public function update(UpdateProductRequest $request, Product $product)
 {
-    $validated = $request->validate();
+    $validated = $request->validated();
 
    // 新しい画像がアップロードされた時だけ差し替え
     if ($request->hasFile('image')) {

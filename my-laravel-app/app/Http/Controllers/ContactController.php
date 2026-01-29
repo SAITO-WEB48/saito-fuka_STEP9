@@ -15,15 +15,10 @@ class ContactController extends Controller
         return view('contact.form');
     }
 
-    // 送信処理（EC・ブログ共通）
-    public function submitForm(Request $request)
+    //送信処理
+    public function submitForm(ContactRequest $request)
     {
-        //入力チェック
-        $request->validate([
-            'name'    => 'required|string|max:100',
-            'email'   => 'required|email',
-            'message' => 'required|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         // 今は保存しない（練習用）
         return back()->with('success', 'お問い合わせを送信しました');

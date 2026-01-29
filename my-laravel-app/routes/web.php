@@ -10,7 +10,6 @@ use App\Http\Controllers\ProfileController;
 
 //EC
 use App\Http\Controllers\Ec\ProductController;
-use App\Http\Controllers\Ec\ProductController as EcProductController;
 use App\Http\Controllers\Ec\PurchaseController;
 
 /*
