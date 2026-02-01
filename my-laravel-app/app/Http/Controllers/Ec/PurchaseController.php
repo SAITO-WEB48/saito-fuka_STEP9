@@ -50,7 +50,7 @@ class PurchaseController extends Controller
         });
 
         return redirect()
-            ->route('ec.mypage')  // ここは routes に合わせてね
+            ->route('ec.mypage') 
             ->with('success', '購入が完了しました');
     }
 }

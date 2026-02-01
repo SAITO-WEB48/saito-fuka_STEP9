@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\ProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 
 class ProductController extends Controller
@@ -54,7 +54,7 @@ public function index(Request $request)
     }
 
     // 商品保存  (登録store)
-    public function store(StoreProductRequest $request)
+    public function store(ProductRequest $request)
     {
         $validated = $request->validated();
 
@@ -84,13 +84,13 @@ public function favorite(Request $request, Product $product)
             'product_id' => $product->id,
         ],
         [
-            'created_at' => now(),
             'updated_at' => now(),
         ]
     );
 
     return response()->json(['favorited' => true]);
 }
+
 
 // お気に入り解除
 public function unfavorite(Request $request, Product $product)

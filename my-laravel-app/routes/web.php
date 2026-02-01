@@ -74,10 +74,10 @@ Route::middleware('auth')->group(function () {
         ->name('ec.products.destroy');
 
     // お気に入り
-    Route::post('/ec/products/{product}/favorite', [EcProductController::class, 'favorite'])
+    Route::post('/ec/products/{product}/favorite', [ProductController::class, 'favorite'])
         ->name('ec.products.favorite');
 
-    Route::delete('/ec/products/{product}/favorite', [EcProductController::class, 'unfavorite'])
+    Route::delete('/ec/products/{product}/favorite', [ProductController::class, 'unfavorite'])
         ->name('ec.products.unfavorite');
 
     // 購入

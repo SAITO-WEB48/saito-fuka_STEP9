@@ -44,15 +44,15 @@
 
               {{-- 他人の商品だけお気に入り表示 --}}
               @if(!$isOwner)
-                <button
-                  id="favorite-btn"
-                  data-product-id="{{ $product->id }}"
-                  data-favorited="{{ $isFavorited ? '1' : '0' }}"
-                  class="favorite-btn"
-                  aria-label="お気に入り"
-                  type="button"
-                >
-                  <span id="favorite-heart" style="color: {{ $isFavorited ? 'red' : '#999' }};">
+            <button
+             type="button"
+             class="favorite-btn"
+             data-favorited="{{ $isFavorited ? '1' : '0' }}"
+             data-favorite-url="{{ route('ec.products.favorite', $product) }}"
+             data-unfavorite-url="{{ route('ec.products.unfavorite', $product) }}"
+             aria-label="お気に入り"
+             >
+                  <span class="favorite-heart" style="color: {{ $isFavorited ? 'red' : '#999' }};">
                     ♥
                   </span>
                 </button>
